@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: startShowAll
+# key: sall
+# --
+#+STARTUP: showall
