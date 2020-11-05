@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: exam
+# key: exam
+# --
+\\documentclass[addpoints,12pt]{exam}
+\\usepackage{chemfig,mhchem}
+\\usepackage[margin=0.75in,top=1in]{geometry}
+\\usepackage{fancyhdr}
+\\pagestyle{fancy}
+\\lhead{Chem-120 Exam-1\\\\Van Camp}
+\\rhead{Name:\\rule{2in}{0.15mm}\\\\}
+\\cfoot{center of the footer!
+\\renewcommand{\\headrulewidth}0.4pt}
+\\vspace{0.2 in}
+
+\\begin{document}
+\\begin{questions}
+
+\\question[10]Why is there air?  \\vspace{1 in}
+
+
+\\end{questions}
+\\end{document}

@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: exam_part
+# key: prt
+# --
+\\begin{parts}
+\\part   
+\\end{parts}
