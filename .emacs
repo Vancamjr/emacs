@@ -25,6 +25,9 @@
   :ensure t
   :config (which-key-mode))
 
+;; Python3
+(setq python-shell-interpreter "python3")
+
 ;; ergonomics my keys
 (defalias 'yes-or-no-p 'y-or-n-p) ; y or n is enough
 (global-set-key (kbd "C-z") 'undo) ; 【Ctrl+z】
@@ -117,6 +120,8 @@
 ;;(require 'org-dotemacs) ;;not used yet
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
+;; added org-mouse.el for mouse support
+(require 'org-mouse)
 
 ;; Org-Mode open links with default program
 (setq org-file-apps
@@ -155,7 +160,10 @@
  '((R . t)
    (emacs-lisp . t)
    (python . t)
+   (ein . t)
    (shell . t)))
+;; Set python to python3
+(setq org-babel-python-command "python3")
 ;; inline images
 (setq org-startup-with-inline-images t) 
 (setq org-redisplay-inline-images t)
@@ -182,10 +190,13 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(custom-safe-themes '("9a155066ec746201156bb39f7518c1828a73d67742e11271e4f24b7b178c4710" default))
+ '(custom-safe-themes
+   '("9a155066ec746201156bb39f7518c1828a73d67742e11271e4f24b7b178c4710" default))
  '(org-agenda-files '("~/Dropbox/org/deft/" "~/schedule.org"))
- '(org-modules  '(ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe))
- '(package-selected-packages '(org-ref org-plus-contrib impatient-mode ranger php-mode org-learn slime deft spotlight avy org-drill yasnippet-classic-snippets r-autoyas common-lisp-snippets yasnippet-snippets yasnippet leuven-theme leuven org-dotemacs magit klere-theme list-packages-ext counsel company ac-html ac-math org-bullets latex-preview-pane latex-math-preview helm-ispell which-key use-package try solarized-theme org-pdfview org-gcal org-dp org-ac nyan-mode multiple-cursors ess auctex)))
+ '(org-modules
+   '(ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe))
+ '(package-selected-packages
+   '(ein alert julia-mode ivy hydra ht helm-core gntp ghub f counsel org-ref org-plus-contrib impatient-mode ranger php-mode org-learn slime deft spotlight avy org-drill yasnippet-classic-snippets r-autoyas common-lisp-snippets yasnippet-snippets yasnippet leuven-theme leuven org-dotemacs magit klere-theme list-packages-ext company ac-html ac-math org-bullets latex-preview-pane latex-math-preview helm-ispell which-key use-package try solarized-theme org-pdfview org-gcal org-dp org-ac nyan-mode multiple-cursors ess auctex)))
 ;; replaced org-mhe->ol-mhe, org-irc->ol-irc, org-info->ol-info, org-guns->ol-guns, org-docview->ol-docview, org-bibtex->ol-bibtex, org-bbdb->ol-bbdb
 
 (custom-set-faces
@@ -193,7 +204,7 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(org-level-1 ((t (:extend nil :background "#F0F0F0" :foreground "#3C3C3C" :overline "#A7A7A7" :weight bold :height 1.1)))))
 
 ;; AucTeX
 (setq TeX-auto-save t)
@@ -251,20 +262,21 @@
 (global-set-key (kbd "<f6>") 'ivy-resume)
 (global-set-key (kbd "M-x") 'counsel-M-x)
 (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-;;(global-set-key (kbd "<f1> f") 'counsel-describe-function)
-;;(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
-;;(global-set-key (kbd "<f1> l") 'counsel-find-library)
-;;(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
-;;(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-find-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
 (global-set-key (kbd "C-c g") 'counsel-git)
 (global-set-key (kbd "C-c j") 'counsel-git-grep)
 (global-set-key (kbd "C-c k") 'counsel-ag)
 (global-set-key (kbd "C-x l") 'counsel-locate)
 (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
-(define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
-;; added allowing <ESC> key to exit minibuffer
-(define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
-;;(define-key ivy-minibuffer-map (kbd "") 'minibuffer-keyboard-quit)
+
+;;(define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+;;;; added allowing <ESC> key to exit minibuffer
+;;(define-key ivy-minibuffer-map [escape] 'minibuffer-keyboard-quit)
+;;;;(define-key ivy-minibuffer-map (kbd "") 'minibuffer-keyboard-quit)
 
 
 ;; Exam mode for latex
