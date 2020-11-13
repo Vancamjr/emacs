@@ -2,7 +2,7 @@
 ;; emacs v 27.1 is in the applications folder
 ;; emacs v 26.1 location /usr/local/Cellar/emacs/26.1_1/share/emacs/26.1
 
-
+;; server off
 ;;(server-start)
 
 ;; startup screen
@@ -25,11 +25,32 @@
   :ensure t
   :config (which-key-mode))
 
+;; rainbow delimiters https://github.com/Fanael/rainbow-delimiters
+(use-package rainbow-delimiters
+  :ensure t)
+(when (require 'rainbow-delimiters nil 'noerror) 
+  (add-hook 'scheme-mode-hook 'rainbow-delimiters-mode))
+(add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+
+
 ;; Python3
 (setq python-shell-interpreter "python3")
+(use-package elpy
+  :ensure t)
+(setq elpy-rpc-python-command "python3")
+(elpy-enable)
+(use-package flycheck
+  :ensure t)
+;; new iPython stuff see:  https://emacs.stackexchange.com/questions/16637/how-to-set-up-elpy-to-use-python3
+(setenv "IPY_TEST_SIMPLE_PROMPT" "1")
+(setq python-shell-interpreter "ipython3"
+      python-shell-interpreter-args "-i")
+
 
 ;; ergonomics my keys
 (defalias 'yes-or-no-p 'y-or-n-p) ; y or n is enough
+(global-linum-mode t) ;; enable line numbers globally
 (global-set-key (kbd "C-z") 'undo) ; 【Ctrl+z】
 (global-set-key (kbd "C-Z") 'redo) ; 【Ctrl+Shift+z】
 (global-set-key (kbd "C-c f") 'find-file)
@@ -100,53 +121,35 @@
 (global-set-key (kbd "C-c d") 'deft)
 (global-set-key (kbd "C-c C-d") 'deft)
 
-
 ;; flyspell stuff
 (require 'flyspell)
-;;(flyspell-mode +1)
-;;(global-set-key (kbd "<f8>") 'ispell-word)
-;;(defun flyspell-check-next-highlighted-word ()
-;;  "Custom function to spell check next highlighted word"
-;;  (interactive)
-;;  (flyspell-goto-next-error)
-;;  (ispell-word))
-;;(global-set-key (kbd "M-<f8>") 'flyspell-check-next-highlighted-word)
-;;(eval-after-load "flyspell"
-;;  '(progn
-;;     (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word)
-;;     (define-key flyspell-mouse-map [mouse-3] #'undefined)))
+
+
+;;=============================================================================
 
 ;; Org-Mode stuff
-;;(require 'org-dotemacs) ;;not used yet
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
-;; added org-mouse.el for mouse support
+;; org-mouse 
 (require 'org-mouse)
-
 ;; Org-Mode open links with default program
 (setq org-file-apps
       '(("\\.docx\\'" . default)
         (auto-mode . emacs)))
-
 ;; Org-Mode default fill
 (setq set-fill-column 90)
-
 ;; org-bullets
 (require 'org-bullets)
 (add-hook 'org-mode-hook 'org-bullets-mode)
 (add-hook 'org-mode-hook 'flyspell-mode)
 (define-key flyspell-mode-map (kbd "C-;") #'flyspell-correct-word-before-point)
-
-;;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
-    (defun unfill-paragraph (&optional region)
-      "Takes a multi-line paragraph and makes it into a single line of text."
-      (interactive (progn (barf-if-buffer-read-only) '(t)))
-      (let ((fill-column (point-max))
-            ;; This would override `fill-column' if it's an integer.
-            (emacs-lisp-docstring-fill-column t))
-        (fill-paragraph nil region)))
-;; Handy key definition
-    (define-key global-map "\M-\S-Q" 'unfill-paragraph)
+;; add mouse tab hook
+(add-hook 'org-mode-hook 
+   (lambda ()
+     (local-set-key [mouse-1] 'org-cycle)
+     ;; display images
+     (local-set-key "\M-I" 'org-toggle-iimage-in-org)
+     ))
 
 ;; mobileorg settings
 (setq org-directory "~/Dropbox/org")
@@ -160,14 +163,14 @@
  '((R . t)
    (emacs-lisp . t)
    (python . t)
+   (ipython . t)
    (ein . t)
    (shell . t)))
 ;; Set python to python3
 (setq org-babel-python-command "python3")
-;; inline images
+;; org inline images
 (setq org-startup-with-inline-images t) 
 (setq org-redisplay-inline-images t)
-
 
 ;; org-ref settings for Bibliography  by John Kitchin
 ;; See: https://github.com/jkitchin/org-ref
@@ -184,19 +187,126 @@
   (lambda (fpath)
     (start-process "open" "*open*" "open" fpath)))
 
+;;=============================================================================
+
+;; Stefan Monnier <foo at acm.org>. It is the opposite of fill-paragraph    
+(defun unfill-paragraph (&optional region)
+  "Takes a multi-line paragraph and makes it into a single line of text."
+  (interactive (progn (barf-if-buffer-read-only) '(t)))
+  (let ((fill-column (point-max))
+        ;; This would override `fill-column' if it's an integer.
+        (emacs-lisp-docstring-fill-column t))
+    (fill-paragraph nil region)))
+;; Handy key definition
+(define-key global-map "\M-\S-Q" 'unfill-paragraph)
+
+;; ace jump mode major function
+;; C-j to jump
+(add-to-list 'load-path "/full/path/where/ace-jump-mode.el/in/")
+(autoload
+  'ace-jump-mode
+  "ace-jump-mode"
+  "Emacs quick move minor mode"
+  t)
+;; you can select the key you prefer to
+(define-key global-map (kbd "C-j") 'ace-jump-mode)
+;;;; jump back not used
+;;;; enable a more powerful jump back function from ace jump mode
+;;(autoload
+;;  'ace-jump-mode-pop-mark
+;;  "ace-jump-mode"
+;;  "Ace jump back:-)"
+;;  t)
+;;(eval-after-load "ace-jump-mode"
+;;  '(ace-jump-mode-enable-mark-sync))
+;;(define-key global-map (kbd "C-x j") 'ace-jump-mode-pop-mark)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(ansi-color-faces-vector
+   [default bold shadow italic underline bold bold-italic bold])
+ '(ansi-color-names-vector
+   ["#3F3F3F" "#CC9393" "#7F9F7F" "#F0DFAF" "#8CD0D3" "#DC8CC3" "#93E0E3" "#DCDCCC"])
+ '(company-quickhelp-color-background "#4F4F4F")
+ '(company-quickhelp-color-foreground "#DCDCCC")
+ '(compilation-message-face 'default)
+ '(cua-global-mark-cursor-color "#2aa198")
+ '(cua-normal-cursor-color "#657b83")
+ '(cua-overwrite-cursor-color "#b58900")
+ '(cua-read-only-cursor-color "#859900")
+ '(custom-enabled-themes '(wheatgrass))
  '(custom-safe-themes
-   '("9a155066ec746201156bb39f7518c1828a73d67742e11271e4f24b7b178c4710" default))
+   '("f2c35f8562f6a1e5b3f4c543d5ff8f24100fae1da29aeb1864bbc17758f52b70" "9bebf6e27baaff3b140e442549a7a2b49c02e52666c9b7ba5a40954f1b5e828b" "c433c87bd4b64b8ba9890e8ed64597ea0f8eb0396f4c9a9e01bd20a04d15d358" "00445e6f15d31e9afaa23ed0d765850e9cd5e929be5e8e63b114a3346236c44c" "285d1bf306091644fb49993341e0ad8bafe57130d9981b680c1dbd974475c5c7" "830877f4aab227556548dc0a28bf395d0abe0e3a0ab95455731c9ea5ab5fe4e1" "2809bcb77ad21312897b541134981282dc455ccd7c14d74cc333b6e549b824f3" "7f1d414afda803f3244c6fb4c2c64bea44dac040ed3731ec9d75275b9e831fe5" "d4f8fcc20d4b44bf5796196dbeabec42078c2ddb16dcb6ec145a1c610e0842f3" "4ced6dc5f82dfbd00a78159179928c5b3ef08384b0e357b2e1e49d915e74b040" "afd761c9b0f52ac19764b99d7a4d871fc329f7392dfc6cd29710e8209c691477" "9a155066ec746201156bb39f7518c1828a73d67742e11271e4f24b7b178c4710" default))
+ '(elpy-modules
+   '(elpy-module-company elpy-module-eldoc elpy-module-flymake elpy-module-pyvenv elpy-module-highlight-indentation elpy-module-yasnippet elpy-module-django elpy-module-sane-defaults))
+ '(elpy-rpc-python-command "python3")
+ '(fci-rule-color "#383838")
+ '(highlight-changes-colors '("#d33682" "#6c71c4"))
+ '(highlight-symbol-colors
+   '("#efe4da49afb1" "#cfc4e1acd08b" "#fe52c9e6b34e" "#dbb6d3c2dcf3" "#e183dee0b053" "#f944cc6dae47" "#d35fdac4e069"))
+ '(highlight-symbol-foreground-color "#586e75")
+ '(highlight-tail-colors
+   '(("#eee8d5" . 0)
+     ("#b3c34d" . 20)
+     ("#6ccec0" . 30)
+     ("#74adf5" . 50)
+     ("#e1af4b" . 60)
+     ("#fb7640" . 70)
+     ("#ff699e" . 85)
+     ("#eee8d5" . 100)))
+ '(hl-bg-colors
+   '("#e1af4b" "#fb7640" "#ff6849" "#ff699e" "#8d85e7" "#74adf5" "#6ccec0" "#b3c34d"))
+ '(hl-fg-colors
+   '("#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3" "#fdf6e3"))
+ '(hl-paren-colors '("#2aa198" "#b58900" "#268bd2" "#6c71c4" "#859900"))
+ '(hl-sexp-background-color "#1c1f26")
+ '(lsp-ui-doc-border "#586e75")
+ '(nrepl-message-colors
+   '("#CC9393" "#DFAF8F" "#F0DFAF" "#7F9F7F" "#BFEBBF" "#93E0E3" "#94BFF3" "#DC8CC3"))
  '(org-agenda-files '("~/Dropbox/org/deft/" "~/schedule.org"))
+ '(org-export-backends '(ascii beamer html icalendar latex odt))
  '(org-modules
    '(ol-bbdb ol-bibtex ol-docview ol-gnus ol-info ol-irc ol-mhe))
  '(package-selected-packages
-   '(ein alert julia-mode ivy hydra ht helm-core gntp ghub f counsel org-ref org-plus-contrib impatient-mode ranger php-mode org-learn slime deft spotlight avy org-drill yasnippet-classic-snippets r-autoyas common-lisp-snippets yasnippet-snippets yasnippet leuven-theme leuven org-dotemacs magit klere-theme list-packages-ext company ac-html ac-math org-bullets latex-preview-pane latex-math-preview helm-ispell which-key use-package try solarized-theme org-pdfview org-gcal org-dp org-ac nyan-mode multiple-cursors ess auctex)))
+   '(rainbow-delimiters flycheck elpy material-theme ace-jump-mode ob-ipython ein alert julia-mode ivy hydra ht helm-core gntp ghub f counsel org-ref org-plus-contrib impatient-mode ranger php-mode org-learn slime deft spotlight avy org-drill yasnippet-classic-snippets r-autoyas common-lisp-snippets yasnippet-snippets yasnippet leuven-theme leuven org-dotemacs magit klere-theme list-packages-ext company ac-html ac-math org-bullets latex-preview-pane latex-math-preview helm-ispell which-key use-package try solarized-theme org-pdfview org-gcal org-dp org-ac nyan-mode multiple-cursors ess auctex))
+ '(pdf-view-midnight-colors '("#DCDCCC" . "#383838"))
+ '(pos-tip-background-color "#eee8d5")
+ '(pos-tip-foreground-color "#586e75")
+ '(smartrep-mode-line-active-bg (solarized-color-blend "#859900" "#eee8d5" 0.2))
+ '(term-default-bg-color "#fdf6e3")
+ '(term-default-fg-color "#657b83")
+ '(vc-annotate-background "#2B2B2B")
+ '(vc-annotate-background-mode nil)
+ '(vc-annotate-color-map
+   '((20 . "#BC8383")
+     (40 . "#CC9393")
+     (60 . "#DFAF8F")
+     (80 . "#D0BF8F")
+     (100 . "#E0CF9F")
+     (120 . "#F0DFAF")
+     (140 . "#5F7F5F")
+     (160 . "#7F9F7F")
+     (180 . "#8FB28F")
+     (200 . "#9FC59F")
+     (220 . "#AFD8AF")
+     (240 . "#BFEBBF")
+     (260 . "#93E0E3")
+     (280 . "#6CA0A3")
+     (300 . "#7CB8BB")
+     (320 . "#8CD0D3")
+     (340 . "#94BFF3")
+     (360 . "#DC8CC3")))
+ '(vc-annotate-very-old-color "#DC8CC3")
+ '(weechat-color-list
+   '(unspecified "#fdf6e3" "#eee8d5" "#a7020a" "#dc322f" "#5b7300" "#859900" "#866300" "#b58900" "#0061a8" "#268bd2" "#a00559" "#d33682" "#007d76" "#2aa198" "#657b83" "#839496"))
+ '(xterm-color-names
+   ["#eee8d5" "#dc322f" "#859900" "#b58900" "#268bd2" "#d33682" "#2aa198" "#073642"])
+ '(xterm-color-names-bright
+   ["#fdf6e3" "#cb4b16" "#93a1a1" "#839496" "#657b83" "#6c71c4" "#586e75" "#002b36"]))
+;; Nov 2020 found several required files missing and replaced them as defined below
 ;; replaced org-mhe->ol-mhe, org-irc->ol-irc, org-info->ol-info, org-guns->ol-guns, org-docview->ol-docview, org-bibtex->ol-bibtex, org-bbdb->ol-bbdb
 
 (custom-set-faces
@@ -297,12 +407,12 @@
 (global-set-key (kbd "C-M->") 'mc/mark-all-like-this)
 
 
-;; theme
-(use-package leuven-theme
-  :ensure t)
-(load-theme 'leuven t)
-(setq leuven-scale-outline-headlines 1)
-(setq leuven-scale-org-agenda-structure 1)
+;; My favorite theme
+;;(use-package leuven-theme
+;;  :ensure t)
+;;(load-theme 'leuven t)
+;;(setq leuven-scale-outline-headlines 1)
+;;(setq leuven-scale-org-agenda-structure 1)
 
 ;; windmove
 (use-package windmove
@@ -335,7 +445,6 @@
         (replace-match " ")))))
 
 ;; dired mode arrow keys
-;; need adjustment for files so these retain the buffer
 (defun jvc-dired-up-directory ()
   "close previous window addition"
   (interactive)
@@ -376,3 +485,4 @@
 (setq recentf-max-menu-items 25)
 (global-set-key "\C-x\ \C-r" 'recentf-open-files)
 (run-at-time nil (* 5 60) 'recentf-save-list)
+
